@@ -5,9 +5,13 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends supervisor \
     && rm -rf /var/lib/apt/lists/*
 
+COPY --chown=frappe:frappe biotime_connector /home/frappe/frappe-bench/apps/biotime_connector
+
 USER frappe
 WORKDIR /home/frappe/frappe-bench
 RUN bench get-app --branch v16.16.0 https://github.com/frappe/hrms \
+    && ./env/bin/pip install -e apps/biotime_connector \
+    && (grep -Fxq 'biotime_connector' sites/apps.txt || echo 'biotime_connector' >> sites/apps.txt) \
     && bench build \
     && grep -Fq '"website.bundle.css"' sites/assets/assets.json \
     && grep -Fq '"erpnext-web.bundle.css"' sites/assets/assets.json \

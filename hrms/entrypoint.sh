@@ -44,10 +44,13 @@ if [ ! -f "sites/$SITE_NAME/site_config.json" ]; then
     --no-mariadb-socket
   runuser -u frappe -- bench --site "$SITE_NAME" install-app erpnext
   runuser -u frappe -- bench --site "$SITE_NAME" install-app hrms
-else
-  runuser -u frappe -- bench --site "$SITE_NAME" migrate
 fi
 
+if ! runuser -u frappe -- bench --site "$SITE_NAME" list-apps | grep -q '^biotime_connector'; then
+  runuser -u frappe -- bench --site "$SITE_NAME" install-app biotime_connector
+fi
+
+runuser -u frappe -- bench --site "$SITE_NAME" migrate
 runuser -u frappe -- bench --site "$SITE_NAME" clear-cache
 runuser -u frappe -- bench --site "$SITE_NAME" clear-website-cache
 runuser -u frappe -- bench use "$SITE_NAME"
